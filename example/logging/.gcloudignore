@@ -1,0 +1,8 @@
+.gcloudignore
+.git
+.gitignore
+Makefile
+go.mod
+go.sum
+
+node_modules
