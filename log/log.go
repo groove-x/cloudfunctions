@@ -7,14 +7,19 @@ import (
 	"net/http"
 	"os"
 
+	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
 	mrpb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
-var projectID string
+var (
+	projectID string
+)
 
 func init() {
-	projectID = os.Getenv("GCP_PROJECT")
+	if metadata.OnGCE() {
+		projectID, _ = metadata.Get("project/project-id")
+	}
 
 	ctx := context.Background()
 	client, err := logging.NewClient(ctx, projectID)
@@ -24,6 +29,9 @@ func init() {
 
 	logName := "cloudfunctions.googleapis.com%2Fcloud-functions"
 	functionName := os.Getenv("FUNCTION_NAME")
+	if functionName == "" {
+		functionName = os.Getenv("K_SERVICE")
+	}
 	region := os.Getenv("FUNCTION_REGION")
 
 	std = client.Logger(logName, logging.CommonResource(&mrpb.MonitoredResource{
@@ -184,4 +192,8 @@ func Fatalln(args ...interface{}) {
 	std.Log(entry)
 	std.Flush()
 	os.Exit(1)
+}
+
+func Flush() error {
+	return std.Flush()
 }
