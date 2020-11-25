@@ -3,7 +3,7 @@ module github.com/groove-x/cloudfunctions
 go 1.11
 
 require (
-	cloud.google.com/go v0.72.0 // indirect
+	cloud.google.com/go v0.72.0
 	cloud.google.com/go/logging v1.1.2
 	github.com/google/go-cmp v0.5.3 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect

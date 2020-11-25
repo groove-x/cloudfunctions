@@ -16,12 +16,24 @@ import (
 
 func ExampleLogging(w http.ResponseWriter, r *http.Request) {
 	log.WithRequest(r)
+	defer log.Flush()
 
 	log.Debug("debug")
 	log.Info("info")
 	log.Warn("warn")
 	log.Error("error")
 
+	logger := log.WithField("key1", 1)
+	logger.Info("structured log")
+
+	log.WithFields(map[string]interface{}{"foo": 1, "bar": 2}).Debug("structured debug log")
+
 	fmt.Fprintln(w, "hello")
 }
+```
+
+deploy:
+
+```
+$ gcloud functions deploy function-1 --runtime=go113 --region=asia-northeast1 --timeout=60s --trigger-http --entry-point=ExampleLogging --update-env-vars=FUNCTION_REGION=asia-northeast1
 ```
