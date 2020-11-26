@@ -102,7 +102,8 @@ func (e *Entry) Infof(format string, args ...interface{}) {
 func (e *Entry) Warnf(format string, args ...interface{}) {
 	entry := e.entry
 	entry.Severity = logging.Warning
-	entry.Payload = fmt.Sprintf(format, args...)
+	e.payload["message"] = fmt.Sprintf(format, args...)
+	entry.Payload = e.payload
 	std.Log(entry)
 }
 
@@ -151,7 +152,8 @@ func (e *Entry) Infoln(args ...interface{}) {
 func (e *Entry) Warnln(args ...interface{}) {
 	entry := e.entry
 	entry.Severity = logging.Warning
-	entry.Payload = fmt.Sprintln(args...)
+	e.payload["message"] = fmt.Sprintln(args...)
+	entry.Payload = e.payload
 	std.Log(entry)
 }
 
