@@ -20,12 +20,26 @@ var (
 	region    string
 )
 
+var (
+	std   stdLogger
+	entry logging.Entry
+)
+
+type stdLogger interface {
+	Log(e logging.Entry)
+	Flush() error
+	StandardLogger(s logging.Severity) *log.Logger
+}
+
 func init() {
-	if metadata.OnGCE() {
-		projectID, _ = metadata.Get("project/project-id")
-		instanceRegion, _ := metadata.Get("instance/region")
-		region = path.Base(instanceRegion)
+	if !metadata.OnGCE() {
+		std = &localLogger{logger: log.Default()}
+		return
 	}
+
+	projectID, _ = metadata.ProjectID()
+	instanceRegion, _ := metadata.Get("instance/region")
+	region = path.Base(instanceRegion)
 
 	ctx := context.Background()
 	client, err := logging.NewClient(ctx, projectID)
@@ -56,11 +70,6 @@ func init() {
 		},
 	}))
 }
-
-var (
-	std   *logging.Logger
-	entry logging.Entry
-)
 
 func WithRequest(r *http.Request) {
 	entry = logging.Entry{
