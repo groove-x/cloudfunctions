@@ -11,6 +11,8 @@ import (
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
 	mrpb "google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -29,6 +31,14 @@ func init() {
 	client, err := logging.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("failed to create logging client: %s", err)
+	}
+
+	if err := client.Ping(ctx); err != nil {
+		if status.Code(err) == codes.PermissionDenied {
+			log.Fatalf(`Caller does not have required permission to use project %[1]s. Grant the caller the roles/logging.logWriter role, or a custom role with the logging.logEntries.create permission, by visiting https://console.developers.google.com/iam-admin/iam/project?project=%[1]s and then retry (propagation of new permission may take a few minutes)., forbidden`, projectID)
+		} else {
+			log.Fatalf("failed to ping logging server: %s", err)
+		}
 	}
 
 	logName := "cloudfunctions.googleapis.com%2Fcloud-functions"
