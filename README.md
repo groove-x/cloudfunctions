@@ -37,3 +37,11 @@ deploy:
 ```
 $ gcloud functions deploy function-1 --runtime=go113 --region=asia-northeast1 --timeout=60s --trigger-http --entry-point=ExampleLogging --update-env-vars=FUNCTION_REGION=asia-northeast1
 ```
+
+
+### requirement for logging
+
+- [Logs Writer (`roles/logging.logWriter`)](https://cloud.google.com/logging/docs/access-control) role for service account. (if you change the runtime service account from *App Engine default service account*.
+  )
+
+
