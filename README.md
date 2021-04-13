@@ -35,7 +35,7 @@ func ExampleLogging(w http.ResponseWriter, r *http.Request) {
 deploy:
 
 ```
-$ gcloud functions deploy function-1 --runtime=go113 --region=asia-northeast1 --timeout=60s --trigger-http --entry-point=ExampleLogging --update-env-vars=FUNCTION_REGION=asia-northeast1
+$ gcloud functions deploy function-1 --runtime=go113 --region=asia-northeast1 --timeout=60s --trigger-http --entry-point=ExampleLogging
 ```
 
 

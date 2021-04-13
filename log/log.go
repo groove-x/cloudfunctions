@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
@@ -14,11 +15,14 @@ import (
 
 var (
 	projectID string
+	region    string
 )
 
 func init() {
 	if metadata.OnGCE() {
 		projectID, _ = metadata.Get("project/project-id")
+		instanceRegion, _ := metadata.Get("instance/region")
+		region = path.Base(instanceRegion)
 	}
 
 	ctx := context.Background()
@@ -32,7 +36,6 @@ func init() {
 	if functionName == "" {
 		functionName = os.Getenv("K_SERVICE")
 	}
-	region := os.Getenv("FUNCTION_REGION")
 
 	std = client.Logger(logName, logging.CommonResource(&mrpb.MonitoredResource{
 		Type: "cloud_function",
