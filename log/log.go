@@ -33,7 +33,7 @@ type stdLogger interface {
 
 func init() {
 	if !metadata.OnGCE() {
-		std = &localLogger{logger: log.Default()}
+		std = &localLogger{logger: log.New(os.Stderr, "", log.LstdFlags)}
 		return
 	}
 
