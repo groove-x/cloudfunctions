@@ -6,19 +6,25 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
 	mrpb "google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
 	projectID string
+	region    string
 )
 
 func init() {
 	if metadata.OnGCE() {
 		projectID, _ = metadata.Get("project/project-id")
+		instanceRegion, _ := metadata.Get("instance/region")
+		region = path.Base(instanceRegion)
 	}
 
 	ctx := context.Background()
@@ -27,12 +33,19 @@ func init() {
 		log.Fatalf("failed to create logging client: %s", err)
 	}
 
+	if err := client.Ping(ctx); err != nil {
+		if status.Code(err) == codes.PermissionDenied {
+			log.Fatalf(`Caller does not have required permission to use project %[1]s. Grant the caller the roles/logging.logWriter role, or a custom role with the logging.logEntries.create permission, by visiting https://console.developers.google.com/iam-admin/iam/project?project=%[1]s and then retry (propagation of new permission may take a few minutes)., forbidden`, projectID)
+		} else {
+			log.Fatalf("failed to ping logging server: %s", err)
+		}
+	}
+
 	logName := "cloudfunctions.googleapis.com%2Fcloud-functions"
 	functionName := os.Getenv("FUNCTION_NAME")
 	if functionName == "" {
 		functionName = os.Getenv("K_SERVICE")
 	}
-	region := os.Getenv("FUNCTION_REGION")
 
 	std = client.Logger(logName, logging.CommonResource(&mrpb.MonitoredResource{
 		Type: "cloud_function",
