@@ -10,7 +10,6 @@ import (
 
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/logging"
-	mrpb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -55,20 +54,11 @@ func init() {
 		}
 	}
 
-	logName := "cloudfunctions.googleapis.com%2Fcloud-functions"
-	functionName := os.Getenv("FUNCTION_NAME")
-	if functionName == "" {
-		functionName = os.Getenv("K_SERVICE")
+	name := os.Getenv("FUNCTION_NAME")
+	if name == "" {
+		name = os.Getenv("K_SERVICE")
 	}
-
-	std = client.Logger(logName, logging.CommonResource(&mrpb.MonitoredResource{
-		Type: "cloud_function",
-		Labels: map[string]string{
-			"function_name": functionName,
-			"project_id":    projectID,
-			"region":        region,
-		},
-	}))
+	std = client.Logger(name)
 }
 
 func WithRequest(r *http.Request) {
