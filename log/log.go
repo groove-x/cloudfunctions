@@ -36,11 +36,11 @@ func init() {
 		return
 	}
 
-	projectID, _ = metadata.ProjectID()
-	instanceRegion, _ := metadata.Get("instance/region")
+	ctx := context.Background()
+	projectID, _ = metadata.ProjectIDWithContext(ctx)
+	instanceRegion, _ := metadata.GetWithContext(ctx, "instance/region")
 	region = path.Base(instanceRegion)
 
-	ctx := context.Background()
 	client, err := logging.NewClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("failed to create logging client: %s", err)
